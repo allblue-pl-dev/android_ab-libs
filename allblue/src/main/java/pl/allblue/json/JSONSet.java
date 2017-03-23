@@ -127,6 +127,40 @@ public class JSONSet
         }
     }
 
+    public State removeState_Deleted()
+    {
+        if (this.state != State.Deleted)
+            return this.state;
+
+        State state = State.None;
+
+        for (int i = 0; i < this.fields.size(); i++) {
+            JSONField field = this.fields.get(i);
+            if (field.isSet(true)) {
+                state = State.Updated;
+                break;
+            }
+        }
+        this.state = state;
+
+        return this.state;
+    }
+
+    public State removeState_Updated()
+    {
+        if (this.state != State.Updated)
+            return this.state;
+
+        for (int i = 0; i < this.fields.size(); i++) {
+            JSONField field = this.fields.get(i);
+            field.unsetValue(true);
+        }
+
+        this.state = State.None;
+
+        return this.state;
+    }
+
     public void setState(State state)
     {
         this.state = state;

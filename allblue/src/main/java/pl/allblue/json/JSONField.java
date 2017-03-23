@@ -123,6 +123,17 @@ abstract public class JSONField<ValueClass>
         this.setValue(value, false);
     }
 
+    public void unsetValue(boolean updated)
+    {
+        if (!updated) {
+            this.value = null;
+            this.value_Set = false;
+        } else {
+            this.updatedValue = null;
+            this.updatedValue_Set = false;
+        }
+    }
+
     public void write(JSONArray json_array, int index, boolean updated_value)
             throws JSONException
     {
