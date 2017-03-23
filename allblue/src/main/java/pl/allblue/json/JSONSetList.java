@@ -184,7 +184,7 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
         return null;
     }
 
-    public void removeDoubles(String field_name)
+    public void removeNew_ByField(String field_name)
     {
         Iterator<SetClass> iter = this.iterator();
         while (iter.hasNext()) {
