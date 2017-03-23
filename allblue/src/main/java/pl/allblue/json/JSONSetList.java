@@ -153,16 +153,25 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
         return this.getAll_JSONObjects(JSONSet.State.Updated, id_field_names);
     }
 
-    public JSONSetList<SetClass> getByField(String field_name, Object value)
+    public JSONSetList<SetClass> getByField(String field_name, Object value,
+            boolean include_deleted_sets)
     {
         JSONSetList<SetClass> set_list = new JSONSetList();
 
         for (int i = 0; i < this.size(); i++) {
+            if (!include_deleted_sets && this.get(i).isDeleted())
+                continue;
+
             if (this.get(i).getField(field_name).isEqual(value))
                 set_list.add(this.get(i));
         }
 
         return set_list;
+    }
+
+    public JSONSetList<SetClass> getByField(String field_name, Object value)
+    {
+        return this.getByField(field_name, value, false);
     }
 
     public SetClass getByField_First(String field_name, Object value)
