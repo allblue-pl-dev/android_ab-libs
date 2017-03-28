@@ -9,5 +9,5 @@
 
     <!-- validator -->
     <string name="notValid_Empty">To pole nie może być puste.</string>
-    <string name="notValid_Regexp">Nieprawidłowy format. Poprawny format to: </string>
+    <string name="notValid_Regexp">"Nieprawidłowy format. "</string>
 </resources>
