@@ -8,7 +8,10 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import pl.allblue.BuildConfig;
 
 public class JSONSet
 {
@@ -107,11 +110,14 @@ public class JSONSet
         for (JSONField field : this.fields) {
             int index = field_names.indexOf(field.getName());
             if (index == -1) {
-                throw new AssertionError("Field `" + field.getName() +
-                        "` does not exist.");
-//                Log.w("JSONSet", "Cannot find field `" + field.getName() +
-//                        "` in: " + Arrays.toString(field_names.toArray()));
-                // continue;
+                if (BuildConfig.DEBUG) {
+                    throw new AssertionError("Field `" + field.getName() +
+                            "` does not exist.");
+                } else {
+                    Log.w("JSONSet", "Cannot find field `" + field.getName() +
+                            "` in: " + Arrays.toString(field_names.toArray()));
+                    continue;
+                }
             }
 
             field.read(json_array, index);
