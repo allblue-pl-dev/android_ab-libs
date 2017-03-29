@@ -113,11 +113,11 @@ public class JSONSet
                 if (BuildConfig.DEBUG) {
                     throw new AssertionError("Field `" + field.getName() +
                             "` does not exist.");
-                } else {
-                    Log.w("JSONSet", "Cannot find field `" + field.getName() +
-                            "` in: " + Arrays.toString(field_names.toArray()));
-                    continue;
                 }
+
+                Log.w("JSONSet", "Cannot find field `" + field.getName() +
+                        "` in: " + Arrays.toString(field_names.toArray()));
+                continue;
             }
 
             field.read(json_array, index);
