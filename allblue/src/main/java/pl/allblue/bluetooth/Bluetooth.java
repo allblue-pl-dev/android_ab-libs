@@ -13,7 +13,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import java.lang.reflect.InvocationTargetException;
+
 import pl.allblue.R;
+import pl.allblue.notifications.Toast;
 
 public class Bluetooth
 {
@@ -103,21 +106,23 @@ public class Bluetooth
                             device.getClass().getMethod("setPairingConfirmation",
                                     boolean.class).invoke(device, false);
                         }
-
-                        activity.unregisterReceiver(this);
+                    } catch (InvocationTargetException e) {
+                        // Do nothing.
                     } catch (Exception e) {
-                        pl.allblue.notifications.Toast.ShowMessage(activity,
+                        Toast.ShowMessage(activity,
                                 activity.getResources().getString(
                                 R.string.bluetooth_Errors_CannotPairDevice));
                         Log.e("Bluetooth", "Cannot pair bluetooth printer.", e);
                         return;
                     }
+
+                    activity.unregisterReceiver(this);
                 }
             }, new IntentFilter("android.bluetooth.device.action.PAIRING_REQUEST"));
 
             device.getClass().getMethod("createBond").invoke(device);
         } catch (Exception e) {
-            pl.allblue.notifications.Toast.ShowMessage(activity,
+            Toast.ShowMessage(activity,
                     activity.getResources().getString(
                             R.string.bluetooth_Errors_CannotPairDevice));
             Log.d("Bluetooth", "Cannot pair bluetooth printer.", e);
