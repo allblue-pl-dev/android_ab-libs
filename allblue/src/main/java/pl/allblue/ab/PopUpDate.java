@@ -7,6 +7,7 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import pl.allblue.util.Date;
 
@@ -48,16 +49,18 @@ public class PopUpDate
         date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar c;
+                Calendar time_calendar;
+
                 if (self.time == null)
-                    c = Calendar.getInstance();
+                    time_calendar = Calendar.getInstance();
                 else {
-                    c = Date.GetCalendar();
-                    c.setTimeInMillis(self.time * 1000);
+                    time_calendar = Date.GetCalendar();
+                    time_calendar.setTimeInMillis(self.time * 1000);
                 }
 
-                self.datePickerDialog.updateDate(c.get(Calendar.YEAR),
-                        c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+                self.datePickerDialog.updateDate(time_calendar.get(Calendar.YEAR),
+                        time_calendar.get(Calendar.MONTH),
+                        time_calendar.get(Calendar.DAY_OF_MONTH));
                 self.datePickerDialog.show();
             }
         });

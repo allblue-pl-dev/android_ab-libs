@@ -11,6 +11,10 @@ import java.util.TimeZone;
 public class Date
 {
 
+    static final public long Span_Hour  =  3600;
+    static final public long Span_Day   =  86400;
+
+
     static private String Date_Format = null;
 
     static public Calendar GetCalendar()

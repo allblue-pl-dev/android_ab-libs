@@ -85,6 +85,9 @@ public class BluetoothPrinter
 
         /* Technologic printers bug workaround. */
         for (int i = 8; i < image.length - 3; i++) {
+            if (image[i] == 16 && image[i + 1] == 5)
+                image[i + 1] = 4;
+
             if (image[i] == 16 && image[i + 1] == 4 && image[i + 2] == 1)
                 image[i + 2] = 0;
         }

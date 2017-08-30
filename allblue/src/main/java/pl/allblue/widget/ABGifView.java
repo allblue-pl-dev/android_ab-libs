@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import pl.allblue.R;
@@ -20,9 +21,8 @@ import pl.allblue.R;
 public class ABGifView extends View
 {
     private int srcId = 0;
-    private InputStream inputStram = null;
     private Movie movie = null;
-    private int movie_Duration = 0;
+    private int movie_Duration = 1;
     private long movie_TimeStart = 0;
 
     private boolean isPlaying = false;
@@ -98,11 +98,30 @@ public class ABGifView extends View
             return;
 
         try {
-            this.inputStram = this.getContext().getResources().openRawResource(this.srcId);
-            this.movie = Movie.decodeStream(this.inputStram);
+            InputStream is = this.getContext().getResources().openRawResource(this.srcId);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+
+            int len = 0;
+            while ((len = is.read(buffer)) != -1)
+                baos.write(buffer, 0, len);
+
+            this.movie = Movie.decodeByteArray(baos.toByteArray(), 0, baos.size());
+            if (this.movie == null) {
+                throw new AssertionError("Cannot decode gif: " + this.getContext()
+                        .getResources().getResourceName(this.srcId));
+            }
+
             this.movie_Duration = this.movie.duration();
+            if (this.movie_Duration == 0) {
+                Log.e("ABGifView", "Cannot decode gif: " +
+                        this.getContext().getResources().getResourceName(this.srcId));
+                this.movie_Duration = 1000;
+            }
         } catch (Exception e) {
-            Log.d("ABGif", "Error while loading GIF: " + e.toString());
+            Log.e("ABGif", "Error while loading GIF.", e);
+            throw new AssertionError(e);
             // Do nothing.
         }
     }
