@@ -56,10 +56,10 @@ abstract public class JSONField<ValueClass>
 
     public boolean isEqual(ValueClass value)
     {
-        if (!this.value_Set)
+        if (!this.isSet())
             return false;
 
-        if (this.value == null)
+        if (this.getValue() == null)
             return value == null;
 
         if (value == null)
