@@ -19,9 +19,16 @@ public class JSONSet
     private State state = State.None;
     private List<JSONField> fields = new ArrayList<>();
 
+    private List<JSONSet> sets = new ArrayList<>();
+
     public JSONSet()
     {
 
+    }
+
+    public void addSet(JSONSet set)
+    {
+        this.sets.add(set);
     }
 
     public void delete()
@@ -61,13 +68,7 @@ public class JSONSet
     public JSONObject getJSONObject(boolean updated_values) throws JSONException
     {
         JSONObject json = new JSONObject();
-
-        for (JSONField field : this.fields) {
-            if (!field.isSet(updated_values))
-                continue;
-
-            field.write(json, updated_values);
-        }
+        this.setJSONObject(json, updated_values);
 
         return json;
     }
@@ -77,29 +78,44 @@ public class JSONSet
         return this.getJSONObject(false);
     }
 
+    public boolean hasField(String field_name)
+    {
+        for (int i = 0; i < this.fields.size(); i++) {
+            if (this.fields.get(i).getName().equals(field_name))
+                return true;
+        }
+
+        return false;
+    }
+
     public boolean isDeleted()
     {
-        return this.state == State.Deleted;
+        return this.isState(State.Deleted);
     }
 
     public boolean isUpdated()
     {
-        return this.state == State.Updated;
+        return this.isState(State.Updated);
     }
 
     public boolean isNew()
     {
-        return this.state == State.New;
+        return this.isState(State.New);
     }
 
     public boolean isState(State state)
     {
+        for (int i = 0; i < this.sets.size(); i++) {
+            if (this.sets.get(i).isState(state))
+                return true;
+        }
+
         if (state == State.Deleted)
-            return this.isDeleted();
+            return this.state == State.Deleted;
         else if (state == state.Updated)
-            return this.isUpdated();
+            return this.state == State.Updated;
         else if (state == State.New)
-            return this.isNew();
+            return this.state == State.New;
 
         return false;
     }
@@ -122,6 +138,9 @@ public class JSONSet
 
             field.read(json_array, index);
         }
+
+        for (int i = 0; i < this.sets.size(); i++)
+            this.sets.get(i).read(field_names, json_array);
     }
 
     public void read(JSONObject json_object)
@@ -131,10 +150,16 @@ public class JSONSet
             if (json_object.has(field.getName()))
                 field.read(json_object);
         }
+
+        for (int i = 0; i < this.sets.size(); i++)
+            this.sets.get(i).read(json_object);
     }
 
     public State removeState_Deleted()
     {
+        for (int i = 0; i < this.sets.size(); i++)
+            this.sets.get(i).removeState_Deleted();
+
         if (this.state != State.Deleted)
             return this.state;
 
@@ -154,6 +179,9 @@ public class JSONSet
 
     public State removeState_Updated()
     {
+        for (int i = 0; i < this.sets.size(); i++)
+            this.sets.get(i).removeState_Updated();
+
         if (this.state != State.Updated)
             return this.state;
 
@@ -167,19 +195,35 @@ public class JSONSet
         return this.state;
     }
 
+    public void setJSONObject(JSONObject json, boolean updated_values) throws JSONException
+    {
+        for (JSONField field : this.fields) {
+            if (!field.isSet(updated_values))
+                continue;
+
+            field.write(json, updated_values);
+        }
+
+        for (int i = 0; i < this.sets.size(); i++)
+            this.sets.get(i).setJSONObject(json, updated_values);
+    }
+
     public void setState(State state)
     {
+        for (int i = 0; i < this.sets.size(); i++)
+            this.sets.get(i).setState(state);
+
         this.state = state;
     }
 
     public void setState_Updated()
     {
-        this.state = State.Updated;
+        this.setState(State.Updated);
     }
 
     public void setState_New()
     {
-        this.state = State.New;
+        this.setState(State.New);
     }
 
     public void update(JSONSet update_set)
@@ -189,10 +233,31 @@ public class JSONSet
             JSONField update_field = update_fields.get(i);
 
             if (update_field.isSet()) {
-                this.getField(update_field.getName()).setValue(
-                        update_field.getValue(), true);
+                String update_field_name = update_field.getName();
+                JSONField field = null;
+
+                if (this.hasField(update_field_name))
+                    field = this.getField(update_field_name);
+                else {
+                    for (int j = 0; j < this.sets.size(); j++) {
+                        if (this.sets.get(j).hasField(update_field_name)) {
+                            field = this.sets.get(j).getField(update_field_name);
+                            break;
+                        }
+                    }
+                }
+
+                if (field == null) {
+                    throw new AssertionError("Field `" + update_field.getName() +
+                            "` does not exists in set of subsets.");
+                }
+
+                field.setValue(update_field.getValue(), true);
             }
         }
+
+        for (int i = 0; i < update_set.sets.size(); i++)
+            this.update(update_set.sets.get(i));
     }
 
     protected void initializeFields()
