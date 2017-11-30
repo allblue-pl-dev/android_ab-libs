@@ -141,7 +141,7 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
             if (!this.get(i).isNew())
                 continue;
 
-            json_array.put(i, this.get(i).getJSONObject());
+            json_array.put(this.get(i).getJSONObject());
         }
 
         return json_array;
