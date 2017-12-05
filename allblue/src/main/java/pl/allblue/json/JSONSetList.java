@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -184,6 +186,72 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
         return null;
     }
 
+    public SetClass getFirst()
+    {
+        if (this.size() == 0)
+            return null;
+
+        return this.get(0);
+    }
+
+    public JSONSetList<SetClass> getOrderedBy(final OrderBy<SetClass> order_by)
+    {
+        JSONSetList<SetClass> set_list = new JSONSetList();
+        set_list.addAll(this);
+
+        Collections.sort(set_list, new Comparator<SetClass>() {
+            @Override
+            public int compare(SetClass setClass, SetClass t1)
+            {
+                return order_by.compares(setClass, t1);
+            }
+        });
+
+        return set_list;
+    }
+
+    public JSONSetList<SetClass> getWhere(Where<SetClass> where,
+            boolean include_deleted_sets)
+    {
+        JSONSetList<SetClass> set_list = new JSONSetList();
+
+        for (int i = 0; i < this.size(); i++) {
+            if (!include_deleted_sets && this.get(i).isDeleted())
+                continue;
+
+            if (where.matches(this.get(i)))
+                set_list.add(this.get(i));
+        }
+
+        return set_list;
+    }
+
+    public JSONSetList<SetClass> getWhere(Where<SetClass> where)
+    {
+        return this.getWhere(where, false);
+    }
+
+    public SetClass getWhere_First(Where<SetClass> where,
+            boolean include_deleted_sets)
+    {
+        JSONSetList<SetClass> set_list = new JSONSetList();
+
+        for (int i = 0; i < this.size(); i++) {
+            if (!include_deleted_sets && this.get(i).isDeleted())
+                continue;
+
+            if (where.matches(this.get(i)))
+                return this.get(i);
+        }
+
+        return null;
+    }
+
+    public SetClass getWhere_First(Where<SetClass> where)
+    {
+        return this.getWhere_First(where, false);
+    }
+
     public void removeNew_ByField(String field_name)
     {
         Iterator<SetClass> iter = this.iterator();
@@ -231,6 +299,17 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
             if (field.isEqual(update_field.getValue()))
                 set.update(update_set);
         }
+    }
+
+
+    public interface OrderBy<SetClass extends JSONSet>
+    {
+        int compares(SetClass set_a, SetClass set_b);
+    }
+
+    public interface Where<SetClass extends JSONSet>
+    {
+        boolean matches(SetClass set);
     }
 
 }
