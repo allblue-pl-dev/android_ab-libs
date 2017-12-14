@@ -283,8 +283,8 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
         JSONSetList<JSONSet> set_list = JSONSetList.Create_FromObjects(set_class,
                 json_array);
         for (int i = 0; i < set_list.size(); i++) {
-            Log.d("JSONSetList", "Updating: " +
-                    set_list.get(i).getField(compare_field_name).getValue());
+//            Log.d("JSONSetList", "Updating: " +
+//                    set_list.get(i).getField(compare_field_name).getValue());
             this.updateBy(compare_field_name, set_list.get(i));
         }
     }
