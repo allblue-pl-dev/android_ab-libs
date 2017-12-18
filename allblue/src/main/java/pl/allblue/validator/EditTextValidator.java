@@ -81,27 +81,27 @@ public class EditTextValidator
 
             String error = null;
 
-            if (error == null && text.equals("")) {
+            if (text.equals("")) {
                 if (f.required)
                     error = this.context.getString(R.string.notValid_Empty);
-            }
-
-            if (error == null && f.regexp != null) {
-                if (!Pattern.matches(f.regexp, text)) {
-                    error = this.context.getString(R.string.notValid_Regexp) +
-                            f.format;
+            } else {
+                if (f.regexp != null) {
+                    if (!Pattern.matches(f.regexp, text)) {
+                        error = this.context.getString(R.string.notValid_Regexp) +
+                                f.format;
+                    }
                 }
-            }
 
-            if (error == null) {
-                for (int j = 0; j < this.customErrors.size(); j++) {
-                    ErrorField eField = this.customErrors.get(j);
-                    if (eField.editText != f.editText)
-                        continue;
+                if (error == null) {
+                    for (int j = 0; j < this.customErrors.size(); j++) {
+                        ErrorField eField = this.customErrors.get(j);
+                        if (eField.editText != f.editText)
+                            continue;
 
-                    if (eField.errorMessage != null) {
-                        error = eField.errorMessage;
-                        break;
+                        if (eField.errorMessage != null) {
+                            error = eField.errorMessage;
+                            break;
+                        }
                     }
                 }
             }
