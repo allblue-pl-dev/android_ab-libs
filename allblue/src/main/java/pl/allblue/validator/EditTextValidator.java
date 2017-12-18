@@ -3,7 +3,6 @@ package pl.allblue.validator;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -17,15 +16,21 @@ public class EditTextValidator
 
     private Context context = null;
     List<RegexpField> fields = new ArrayList<>();
+    List<ErrorField> customErrors = new ArrayList<>();
+
 
     public EditTextValidator(Context context)
     {
         this.context = context;
     }
 
-    public void addError(EditText edit_text, String error_message)
+    public void addError(EditText editText, String errorMessage)
     {
+        ErrorField eField = new ErrorField();
+        eField.editText = editText;
+        eField.errorMessage = errorMessage;
 
+        this.customErrors.add(eField);
     }
 
     public void addRegexp(final EditText edit_text, boolean required, String regexp,
@@ -57,10 +62,10 @@ public class EditTextValidator
         this.fields.add(f);
     }
 
-    public void addRegexp(final EditText edit_text, boolean required)
-    {
-        this.addRegexp(edit_text, required, null, "");
-    }
+//    public void addRegexp(final EditText edit_text, boolean required)
+//    {
+//        this.addRegexp(edit_text, required, null, "");
+//    }
 
     public boolean validate()
     {
@@ -74,26 +79,37 @@ public class EditTextValidator
 
             f.editText.setError(null);
 
-            if (text.equals("")) {
-                if (f.required) {
-                    f.editText.setError(this.context.getString(R.string.notValid_Empty));
+            String error = null;
 
-                    if (valid)
-                        f.editText.requestFocus();
-                    valid = false;
-                }
-
-                continue;
+            if (error == null && text.equals("")) {
+                if (f.required)
+                    error = this.context.getString(R.string.notValid_Empty);
             }
 
-            if (f.regexp == null)
+            if (error == null && f.regexp != null) {
+                if (!Pattern.matches(f.regexp, text)) {
+                    error = this.context.getString(R.string.notValid_Regexp) +
+                            f.format;
+                }
+            }
+
+            if (error == null) {
+                for (int j = 0; j < this.customErrors.size(); j++) {
+                    ErrorField eField = this.customErrors.get(j);
+                    if (eField.editText != f.editText)
+                        continue;
+
+                    if (eField.errorMessage != null) {
+                        error = eField.errorMessage;
+                        break;
+                    }
+                }
+            }
+
+            if (error == null)
                 continue;
 
-            if (Pattern.matches(f.regexp, text))
-                continue;
-
-            f.editText.setError(this.context.getString(R.string.notValid_Regexp) +
-                    f.format);
+            f.editText.setError(error);
 
             if (valid)
                 f.editText.requestFocus();
@@ -103,12 +119,40 @@ public class EditTextValidator
         return valid;
     }
 
+    public boolean isFieldValid(EditText eField)
+    {
+        for (int i = 0; i < this.fields.size(); i++) {
+            RegexpField rField = this.fields.get(i);
+            if (rField.editText != eField)
+                continue;
+
+            String text = eField.getText().toString();
+
+            if (text.equals("")) {
+                if (rField.required)
+                    return false;
+            }
+
+            if (!Pattern.matches(rField.regexp, text))
+                return false;
+        }
+
+        return true;
+    }
+
+
     class RegexpField
     {
         EditText editText = null;
         boolean required = false;
         String regexp = null;
         String format = "";
+    }
+
+    class ErrorField
+    {
+        EditText editText = null;
+        String errorMessage = "";
     }
 
 }
