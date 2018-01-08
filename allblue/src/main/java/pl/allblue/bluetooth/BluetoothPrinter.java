@@ -183,8 +183,8 @@ public class BluetoothPrinter
 
     public void printImage(Bitmap image, int width) throws IOException
     {
-        if (!this.isConnected())
-            throw new AssertionError("Printer not connected.");
+//        if (!this.isConnected())
+//            throw new AssertionError("Printer not connected.");
 
         byte[] line_bytes = BluetoothPrinter.GetBytes_Line();
         byte[] image_bytes = BluetoothPrinter.GetBytes_Image(image, width);
@@ -200,8 +200,8 @@ public class BluetoothPrinter
 
     public void sendBytes(byte[] bytes) throws IOException
     {
-        if (!this.isConnected())
-            throw new AssertionError("Printer not connected.");
+//        if (!this.isConnected())
+//            throw new AssertionError("Printer not connected.");
 
         BufferedOutputStream socket_os = new BufferedOutputStream(
                 this.socket.getOutputStream());
