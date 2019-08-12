@@ -17,13 +17,21 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
 
     static public <SetClass extends JSONSet> JSONSetList<SetClass>
             Create_FromArrays(Class<? extends JSONSet> set_class,
-            List<String> field_names, JSONArray json_array) throws
+            List<String> field_names, JSONArray json_array, int maxLength) throws
             IllegalAccessException, InstantiationException, JSONException
     {
         JSONSetList set_list = new JSONSetList();
-        set_list.addAll_JSONArrays(set_class, field_names, json_array);
+        set_list.addAll_JSONArrays(set_class, field_names, json_array, maxLength);
 
         return set_list;
+    }
+
+    static public <SetClass extends JSONSet> JSONSetList<SetClass>
+    Create_FromArrays(Class<? extends JSONSet> set_class,
+            List<String> field_names, JSONArray json_array) throws
+            IllegalAccessException, InstantiationException, JSONException
+    {
+        return JSONSetList.Create_FromArrays(set_class, field_names, json_array, -1);
     }
 
     static public <SetClass extends JSONSet> JSONSetList<SetClass>
@@ -44,16 +52,25 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
     }
 
     public void addAll_JSONArrays(Class<? extends JSONSet> set_class,
-            List<String> field_names, JSONArray json_array)
+            List<String> field_names, JSONArray json_array, int maxLength)
             throws IllegalAccessException, InstantiationException, JSONException
     {
-        int json_array_length = json_array.length();
-        for (int i = 0; i < json_array_length; i++) {
+        int setLength = json_array.length();
+        if (maxLength > -1)
+            setLength = Math.min(setLength, maxLength);
+        for (int i = 0; i < setLength; i++) {
             SetClass json_set = (SetClass)set_class.newInstance();
             json_set.read(field_names, json_array.getJSONArray(i));
 
             this.add(json_set);
         }
+    }
+
+    public void addAll_JSONArrays(Class<? extends JSONSet> set_class,
+            List<String> field_names, JSONArray json_array)
+            throws IllegalAccessException, InstantiationException, JSONException
+    {
+        this.addAll_JSONArrays(set_class, field_names, json_array, -1);
     }
 
     public void addAll_JSONObjects(int index, Class<? extends JSONSet> set_class,

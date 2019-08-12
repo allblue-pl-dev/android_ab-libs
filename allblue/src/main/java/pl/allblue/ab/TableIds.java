@@ -38,7 +38,7 @@ public class TableIds
 
             JSONObject tables_ids = json.getJSONObject("tablesIds");
             if (!tables_ids.has(table_alias))
-                return null;
+                throw new AssertionError("Cannot get next table id. Table alias does not exist.");
 
             JSONArray ids = tables_ids.getJSONArray(table_alias);
             if (ids.length() == 0)
@@ -57,7 +57,7 @@ public class TableIds
             editor.commit();
         } catch (JSONException e) {
             Log.e("App", "Cannot get next table id.", e);
-            throw new AssertionError("Canno get next table id: " + e.getMessage());
+            throw new AssertionError("Cannot get next table id: " + e.getMessage());
         }
 
         return next_id;
@@ -71,6 +71,8 @@ public class TableIds
         JSONObject json = new JSONObject();
         try {
             json.put("tablesIds", tables_ids);
+
+            Log.d("Test", "Saved table ids: " + tables_ids.toString());
         } catch (JSONException e) {
             Log.e("TableIds", "Cannot parse table ids.", e);
             new AssertionError("Cannot parse table ids: " + e.getMessage());

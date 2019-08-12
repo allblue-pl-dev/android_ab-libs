@@ -136,7 +136,12 @@ public class JSONSet
                 continue;
             }
 
-            field.read(json_array, index);
+            try {
+                field.read(json_array, index);
+            } catch (JSONException e) {
+                Log.e("JSONSet", "Error while reading: " + json_array.toString());
+                throw e;
+            }
         }
 
         for (int i = 0; i < this.sets.size(); i++)
