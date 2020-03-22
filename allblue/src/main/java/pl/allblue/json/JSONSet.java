@@ -126,10 +126,10 @@ public class JSONSet
         for (JSONField field : this.fields) {
             int index = field_names.indexOf(field.getName());
             if (index == -1) {
-                if (BuildConfig.DEBUG) {
-                    throw new AssertionError("Field `" + field.getName() +
-                            "` does not exist.");
-                }
+//                if (BuildConfig.DEBUG) {
+//                    throw new AssertionError("Field `" + field.getName() +
+//                            "` does not exist.");
+//                }
 
                 Log.w("JSONSet", "Cannot find field `" + field.getName() +
                         "` in: " + Arrays.toString(field_names.toArray()));

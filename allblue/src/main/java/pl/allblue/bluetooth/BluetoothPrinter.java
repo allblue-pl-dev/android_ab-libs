@@ -42,6 +42,34 @@ public class BluetoothPrinter
         return combined_bytes;
     }
 
+    static private byte[] GetBytes_Empty(int width, int emptyWidth, int emptyHeight)
+    {
+        float f = ((float)width) / ((float)emptyWidth);
+        int height = (int)(emptyHeight * f);
+
+        byte[] image = new byte[8 + (width / 8) * height];
+
+        /* Print Format */
+        image[0] = 0x1d;
+        image[1] = 0x76;
+        image[2] = 0x30;
+        image[3] = 0;
+        image[4] = (byte)((width / 8) % 256);
+        image[5] = (byte)((width / 8) / 256);
+        image[6] = (byte)(height % 256);
+        image[7] = (byte)(height / 256);
+
+        /* Image Data */
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < (width / 8); j++) {
+                byte color_byte = 0;
+                image[8 + i * (width / 8) + j] = color_byte;
+            }
+        }
+
+        return image;
+    }
+
     static private byte[] GetBytes_Image(Bitmap bitmap, int width)
     {
         if (bitmap == null)
@@ -104,7 +132,8 @@ public class BluetoothPrinter
         line[0] = 0x1b;
         line[1] = 0x21;
         line[2] = 0x00;
-        line[3] = space.getBytes()[0];
+        line[3] = 0x00;
+//        line[3] = space.getBytes()[0];
         line[4] = 0x0D;
         line[5] = 0x0D;
         line[6] = 0x0D;
@@ -186,16 +215,21 @@ public class BluetoothPrinter
 //        if (!this.isConnected())
 //            throw new AssertionError("Printer not connected.");
 
+        byte[] empty_bytes = BluetoothPrinter.GetBytes_Empty(width, 100, 30);
+
         byte[] line_bytes = BluetoothPrinter.GetBytes_Line();
         byte[] image_bytes = BluetoothPrinter.GetBytes_Image(image, width);
 
-        byte[] all_bytes = BluetoothPrinter.GetBytes_Combine(new byte[][] {
-                line_bytes, line_bytes, line_bytes,
-                image_bytes,
-                line_bytes, line_bytes, line_bytes
-        });
+//        byte[] all_bytes = BluetoothPrinter.GetBytes_Combine(new byte[][] {
+////                line_bytes, line_bytes, line_bytes,
+//                image_bytes
+//        });
 
-        this.sendBytes(all_bytes);
+        this.sendBytes(empty_bytes);
+
+        this.sendBytes(image_bytes);
+
+        this.sendBytes(empty_bytes);
     }
 
     public void sendBytes(byte[] bytes) throws IOException
