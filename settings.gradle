@@ -1,1 +1,4 @@
+
 include ':allblue'
+
+rootProject.name = "AB Libs"
