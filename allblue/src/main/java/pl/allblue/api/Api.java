@@ -130,10 +130,11 @@ public class Api
             String line = br.readLine();
             if (!line.equals("ABApi")) {
                 result = 2;
-                StringBuilder messsage_Builder = new StringBuilder();
+                StringBuilder message_Builder = new StringBuilder();
+                message_Builder.append(line);
                 for (int c = br.read(); c != -1; c = br.read())
-                    messsage_Builder.append((char)c);
-                message = "Wrong response format: " + messsage_Builder.toString();
+                    message_Builder.append((char)c);
+                message = "Wrong response format: " + message_Builder.toString();
             } else {
                 result = Integer.parseInt(br.readLine());
 
@@ -158,7 +159,7 @@ public class Api
             Log.e("Api", "Stream Error", e);
 
             result = 2;
-            message = "Stream error.";
+            message = "Stream Error: " + e.getMessage();
 
             if (br != null) {
                 try {

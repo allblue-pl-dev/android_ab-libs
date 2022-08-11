@@ -9,14 +9,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 import pl.allblue.app.ABApp;
+import pl.allblue.io.ABFile;
+import pl.allblue.json.JSONHelper;
 
 public class TableIds
 {
 
+    static public final String FileNames_TableIds = ABApp.Path +
+            "table-ids.json";
+    /* Old */
     static public final String Preferences_TableIds = ABApp.Path +
             "TableIds.TableIds";
-
+    /* / Old */
 
     Context context = null;
 
@@ -25,16 +32,24 @@ public class TableIds
         this.context = context;
     }
 
-    public Integer getNext(String table_alias) throws EmptyTableIdsException
+    public Integer getNext(String table_alias) throws CannotSaveTableIds,
+            EmptyTableIdsException
     {
-        SharedPreferences preferences = PreferenceManager
-                .getDefaultSharedPreferences(this.context);
-
-        int next_id = 0;
-
         try {
-            JSONObject json = new JSONObject(preferences.getString(
-                    TableIds.Preferences_TableIds, "{\"tablesIds\":{}"));
+            SharedPreferences preferences = null;
+            JSONObject json = null;
+
+            if (ABFile.Exists(this.context, TableIds.FileNames_TableIds))
+                json = JSONHelper.GetJSONFromFile(this.context, TableIds.FileNames_TableIds);
+            else {
+                preferences = PreferenceManager
+                        .getDefaultSharedPreferences(this.context);
+
+                json = new JSONObject(preferences.getString(
+                        TableIds.Preferences_TableIds, "{\"tablesIds\":{}"));
+            }
+
+            int next_id = 0;
 
             JSONObject tables_ids = json.getJSONObject("tablesIds");
             if (!tables_ids.has(table_alias))
@@ -44,6 +59,8 @@ public class TableIds
             if (ids.length() == 0)
                 throw new EmptyTableIdsException();
 
+            Log.d("Test", "Table Ids: " + ids.toString());
+
             next_id = ids.getInt(0);
 
             JSONArray new_ids = new JSONArray();
@@ -52,22 +69,36 @@ public class TableIds
             tables_ids.put(table_alias, new_ids);
             json.put("tablesIds", tables_ids);
 
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(TableIds.Preferences_TableIds, json.toString());
-            editor.commit();
-        } catch (JSONException e) {
-            Log.e("App", "Cannot get next table id.", e);
-            throw new AssertionError("Cannot get next table id: " + e.getMessage());
-        }
+            Log.d("Test", "Table Ids After: " + ids.toString());
 
-        return next_id;
+            try {
+                ABFile.PutContent(this.context, TableIds.FileNames_TableIds,
+                        json.toString());
+            } catch (IOException e) {
+                throw new CannotSaveTableIds();
+            }
+
+            if (preferences != null) {
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.remove(TableIds.Preferences_TableIds);
+                if (!editor.commit())
+                    throw new CannotSaveTableIds();
+            }
+
+            return next_id;
+        } catch (IOException e) {
+            Log.e("App", "Cannot get next table id from file.", e);
+            throw new AssertionError("Cannot get next table id from file: " +
+                    e.getMessage());
+        } catch (JSONException e) {
+            Log.e("App", "Cannot get next table id from json.", e);
+            throw new AssertionError("Cannot get next table id from json: " +
+                    e.getMessage());
+        }
     }
 
-    public void set(JSONObject tables_ids)
+    public void set(JSONObject tables_ids) throws CannotSaveTableIds
     {
-        SharedPreferences preferences = PreferenceManager
-                .getDefaultSharedPreferences(this.context);
-
         JSONObject json = new JSONObject();
         try {
             json.put("tablesIds", tables_ids);
@@ -78,11 +109,19 @@ public class TableIds
             new AssertionError("Cannot parse table ids: " + e.getMessage());
         }
 
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(TableIds.Preferences_TableIds, json.toString());
-        editor.commit();
+        try {
+            ABFile.PutContent(this.context, TableIds.FileNames_TableIds,
+                    json.toString());
+        } catch (IOException e) {
+            throw new CannotSaveTableIds();
+        }
     }
 
+
+    public class CannotSaveTableIds extends Exception
+    {
+
+    }
 
     public class EmptyTableIdsException extends Exception
     {

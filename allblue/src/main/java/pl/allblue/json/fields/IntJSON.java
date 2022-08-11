@@ -23,6 +23,11 @@ public class IntJSON extends JSONField<Integer>
     @Override
     protected boolean compareValue(Integer value)
     {
+        Integer this_Value = this.getValue();
+
+        if (this_Value == null)
+            return value == null;
+
         return this.getValue().compareTo(value) == 0;
     }
 

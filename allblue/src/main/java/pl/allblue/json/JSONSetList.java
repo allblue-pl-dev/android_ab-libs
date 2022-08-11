@@ -284,8 +284,12 @@ public class JSONSetList<SetClass extends JSONSet> extends ArrayList<SetClass>
                 if (fields_set_b.isNew())
                     continue;
 
-                if (fields_set_a.getField(field_name).compareValue(
-                        fields_set_b.getField(field_name).getValue())) {
+                JSONField field_a = fields_set_a.getField(field_name);
+                JSONField field_b = fields_set_b.getField(field_name);
+                if (field_a == null || field_b == null)
+                    continue;
+
+                if (field_a.compareValue(field_b.getValue())) {
                     iter.remove();
                     break;
                 }

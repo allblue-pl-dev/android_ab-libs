@@ -57,6 +57,8 @@ public class ABFile
         FileOutputStream fos = new FileOutputStream(file);
         byte[] data_bytes = content.getBytes();
         fos.write(data_bytes);
+        fos.flush();
+        fos.getFD().sync();
         fos.close();
     }
 
