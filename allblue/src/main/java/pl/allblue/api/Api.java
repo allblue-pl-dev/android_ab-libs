@@ -190,7 +190,6 @@ public class Api
 
         try {
             chunkName = br.readLine();
-            Log.d("Stream Test", "Chunk name: " + chunkName);
             if (chunkName == null)
                 return null;
 

@@ -94,18 +94,20 @@ public class Notifications
 
     public void finishLoading()
     {
-        this.wLoading.setVisibility(View.GONE);
-        this.wLoading_Gif.stop();
-        this.wLoading_Message.setText("");
+        this.activity.runOnUiThread(() -> {
+            this.wLoading.setVisibility(View.GONE);
+            this.wLoading_Gif.stop();
+            this.wLoading_Message.setText("");
 
-        this.loading_InProgress = false;
+            this.loading_InProgress = false;
 
-        if (!this.message_InProgress) {
-            this.activity.getActionBar().setDisplayHomeAsUpEnabled(
-                    this.activity.abHasParent());
-            this.activity.setRequestedOrientation(
-                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        }
+            if (!this.message_InProgress) {
+                this.activity.getActionBar().setDisplayHomeAsUpEnabled(
+                        this.activity.abHasParent());
+                this.activity.setRequestedOrientation(
+                        ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+            }
+        });
     }
 
     public void showConfirmation(Context context, String text, String yes, String no,
