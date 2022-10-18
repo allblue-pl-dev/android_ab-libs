@@ -129,14 +129,12 @@ public class ABActivity extends Activity
     {
         Class<?> ab_activity_class = this.getClass();
         while (true) {
-            Log.d("ABActivity", "Before: " + ab_activity_class);
             Field[] fields = null;
             try {
                 fields = ab_activity_class.getDeclaredFields();
             } catch (Exception e) {
                 break;
             }
-            Log.d("ABActivity", "After");
             for (Field field : fields) {
                 try {
                     if (!Modifier.isPublic(field.getModifiers()))

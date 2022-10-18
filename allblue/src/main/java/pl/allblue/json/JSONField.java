@@ -99,7 +99,7 @@ abstract public class JSONField<ValueClass>
             throw new AssertionError("`JSONSet` not set.");
 
         /* No update or modifying new set. */
-        if (!update || this.jsonSet.isNew()) {
+        if (!update) {
             this.value = value;
             this.value_Set = true;
 
@@ -112,8 +112,6 @@ abstract public class JSONField<ValueClass>
         /* Update */
         this.updatedValue = value;
         this.updatedValue_Set = true;
-
-        this.jsonSet.setState_Updated();
 
         return;
     }
