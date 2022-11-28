@@ -102,8 +102,6 @@ public class TableIds
         JSONObject json = new JSONObject();
         try {
             json.put("tablesIds", tables_ids);
-
-            Log.d("Test", "Saved table ids: " + tables_ids.toString());
         } catch (JSONException e) {
             Log.e("TableIds", "Cannot parse table ids.", e);
             new AssertionError("Cannot parse table ids: " + e.getMessage());
