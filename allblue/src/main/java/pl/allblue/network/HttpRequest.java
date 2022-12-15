@@ -21,7 +21,7 @@ import pl.allblue.api.Api;
 public class HttpRequest
 {
 
-    static public final int TIMEOUT = 30000;
+    static public final int TIMEOUT = 300000;
 
 
     static public void Post(final String uri, final Map<String, String> fields,
