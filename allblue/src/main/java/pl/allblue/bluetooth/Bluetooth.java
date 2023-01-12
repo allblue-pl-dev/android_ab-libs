@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -30,6 +31,38 @@ public class Bluetooth
         /* Bluetooth Not Supported */
         if (adapter == null) {
             listener.onEnabled(EnableResult.NotSupported);
+            return false;
+        }
+
+        /* Define Required Permissions */
+        String[] requiredPermissions = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requiredPermissions = new String[] {
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN,
+            };
+        } else {
+            requiredPermissions = new String[] {
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+            };
+        }
+
+        /* Check and Request Permissions */
+        boolean hasRequiredPermissions = true;
+        for (int i = 0; i < requiredPermissions.length; i++) {
+            if (ContextCompat.checkSelfPermission(activity, requiredPermissions[i]) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                hasRequiredPermissions = false;
+                break;
+            }
+        }
+        if (!hasRequiredPermissions) {
+            ActivityCompat.requestPermissions(activity,
+                    requiredPermissions,
+                    request_code);
+
             return false;
         }
 
@@ -58,17 +91,6 @@ public class Bluetooth
 
                 return false;
             }
-        }
-
-        /* Request Required Permissions */
-        if (ContextCompat.checkSelfPermission(activity,
-                Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity,
-                    new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
-                    request_code);
-
-            return false;
         }
 
         return true;
