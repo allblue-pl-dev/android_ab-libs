@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import pl.allblue.BuildConfig;
-
 public class JSONSet
 {
 
@@ -23,6 +21,20 @@ public class JSONSet
     public JSONSet()
     {
 
+    }
+
+    public JSONArray addToJSONArray(List<String> field_names, JSONArray json)
+            throws JSONException
+    {
+        for (JSONField field : this.fields) {
+            int index = field_names.indexOf(field.getName());
+            if (index == -1)
+                continue;
+
+            field.write(json, index, false);
+        }
+
+        return json;
     }
 
     public void addSet(JSONSet set)
@@ -46,17 +58,7 @@ public class JSONSet
 
     public JSONArray getJSONArray(List<String> field_names) throws JSONException
     {
-        JSONArray json = new JSONArray();
-
-        for (JSONField field : this.fields) {
-            int index = field_names.indexOf(field.getName());
-            if (index == -1)
-                continue;
-
-            field.write(json, index, false);
-        }
-
-        return json;
+        return this.addToJSONArray(field_names, new JSONArray());
     }
 
     public JSONObject getJSONObject(boolean updated_values) throws JSONException

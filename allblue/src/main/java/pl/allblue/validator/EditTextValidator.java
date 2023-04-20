@@ -1,9 +1,12 @@
 package pl.allblue.validator;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +17,14 @@ import pl.allblue.R;
 public class EditTextValidator
 {
 
-    private Context context = null;
+    private Activity activity = null;
     List<RegexpField> fields = new ArrayList<>();
     List<ErrorField> customErrors = new ArrayList<>();
 
 
-    public EditTextValidator(Context context)
+    public EditTextValidator(Activity activity)
     {
-        this.context = context;
+        this.activity = activity;
     }
 
     public void addError(EditText editText, String errorMessage)
@@ -75,19 +78,20 @@ public class EditTextValidator
             RegexpField f = this.fields.get(i);
             String text = f.editText.getText().toString();
 
-            f.editText.clearFocus();
-
-            f.editText.setError(null);
+            this.activity.runOnUiThread(() -> {
+                f.editText.clearFocus();
+                f.editText.setError(null);
+            });
 
             String error = null;
 
             if (text.equals("")) {
                 if (f.required)
-                    error = this.context.getString(R.string.notValid_Empty);
+                    error = this.activity.getString(R.string.notValid_Empty);
             } else {
                 if (f.regexp != null) {
                     if (!Pattern.matches(f.regexp, text)) {
-                        error = this.context.getString(R.string.notValid_Regexp) +
+                        error = this.activity.getString(R.string.notValid_Regexp) +
                                 f.format;
                     }
                 }
@@ -109,10 +113,15 @@ public class EditTextValidator
             if (error == null)
                 continue;
 
-            f.editText.setError(error);
+            final boolean valid_Final = valid;
+            final String error_Final = error;
 
-            if (valid)
-                f.editText.requestFocus();
+            this.activity.runOnUiThread(() -> {
+                f.editText.setError(error_Final);
+                if (valid_Final)
+                    f.editText.requestFocus();
+            });
+
             valid = false;
         }
 
