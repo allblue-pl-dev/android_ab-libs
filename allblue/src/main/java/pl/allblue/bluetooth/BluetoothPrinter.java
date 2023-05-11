@@ -215,7 +215,10 @@ public class BluetoothPrinter
 //        if (!this.isConnected())
 //            throw new AssertionError("Printer not connected.");
 
-        byte[] empty_bytes = BluetoothPrinter.GetBytes_Empty(width, 100, 30);
+        byte[] empty_bytes_20 = BluetoothPrinter.GetBytes_Empty(width,
+                100, 20);
+        byte[] empty_bytes_10 = BluetoothPrinter.GetBytes_Empty(width,
+                100, 10);
 
         byte[] line_bytes = BluetoothPrinter.GetBytes_Line();
         byte[] image_bytes = BluetoothPrinter.GetBytes_Image(image, width);
@@ -225,11 +228,11 @@ public class BluetoothPrinter
 //                image_bytes
 //        });
 
-        this.sendBytes(empty_bytes);
+        this.sendBytes(empty_bytes_20);
 
         this.sendBytes(image_bytes);
 
-        this.sendBytes(empty_bytes);
+         this.sendBytes(empty_bytes_10);
     }
 
     public void sendBytes(byte[] bytes) throws IOException

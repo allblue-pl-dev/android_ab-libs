@@ -12,14 +12,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.ReentrantLock;
 
 import pl.allblue.app.ABActivity;
 import pl.allblue.widget.ABGifView;
 
-public class Notifications
-{
+public class Notifications {
 
     private ABActivity activity = null;
+    private ReentrantLock lock = null;
 
     private boolean loading_InProgress = false;
     private boolean message_InProgress = false;
@@ -37,11 +38,11 @@ public class Notifications
     private TextView wMessage_Message = null;
 
     public Notifications(ABActivity activity,
-             int loading_view_id, int loading_gif_view_id, int loading_text_view_id,
-             int message_view_id, int message_image_view_id, int message_text_view_id,
-             int success_message_image_id, int failure_message_image_id)
-    {
+                         int loading_view_id, int loading_gif_view_id, int loading_text_view_id,
+                         int message_view_id, int message_image_view_id, int message_text_view_id,
+                         int success_message_image_id, int failure_message_image_id) {
         this.activity = activity;
+        this.lock = new ReentrantLock();
 
         ViewGroup view_group;
 
@@ -62,16 +63,16 @@ public class Notifications
             throw new AssertionError(
                     "`loading_message_text_view_id` does not exist.");
         }
-        
+
         this.wLoading.setVisibility(View.GONE);
 
         /* Message View */
         view_group = this.activity.abAddContentView(message_view_id);
 
         this.wMessage = view_group;
-        this.wMessage_Image = (ImageView)view_group.findViewById(
+        this.wMessage_Image = (ImageView) view_group.findViewById(
                 message_image_view_id);
-        this.wMessage_Message = (TextView)view_group.findViewById(
+        this.wMessage_Message = (TextView) view_group.findViewById(
                 message_text_view_id);
 
         this.message_ImageIds_Success = success_message_image_id;
@@ -82,93 +83,119 @@ public class Notifications
 
     public void startLoading(String message)
     {
-        this.activity.abSoftKeyboard_Hide();
-        this.activity.getActionBar().setDisplayHomeAsUpEnabled(
-                this.activity.abHasParent());
+        this.activity.runOnUiThread(() -> {
+            this.lock.lock();
+            this.loading_InProgress = true;
 
-        this.loading_InProgress = true;
+            this.activity.abSoftKeyboard_Hide();
+            this.activity.getActionBar().setDisplayHomeAsUpEnabled(
+                    this.activity.abHasParent());
 
-        this.wLoading_Message.setText(message);
-        this.wLoading_Gif.play();
-        this.wLoading.setVisibility(View.VISIBLE);
+            this.wLoading_Message.setText(message);
+            this.wLoading_Gif.play();
+            this.wLoading.setVisibility(View.VISIBLE);
+
+            this.lock.unlock();
+        });
     }
 
     public void finishLoading()
     {
         this.activity.runOnUiThread(() -> {
+            this.lock.lock();
+            this.loading_InProgress = false;
+
             this.wLoading.setVisibility(View.GONE);
             this.wLoading_Gif.stop();
             this.wLoading_Message.setText("");
 
-            this.loading_InProgress = false;
-
             if (!this.message_InProgress) {
                 this.activity.getActionBar().setDisplayHomeAsUpEnabled(
                         this.activity.abHasParent());
-                this.activity.setRequestedOrientation(
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+//                this.activity.setRequestedOrientation(
+//                        ActivityInfo.SCREEN_ORIENTATION_SENSOR);
             }
+
+            this.lock.unlock();
         });
     }
 
     public void showConfirmation(Context context, String text, String yes, String no,
            final OnClickListener callback)
     {
-        new AlertDialog.Builder(context)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setTitle(text)
-            .setPositiveButton(yes, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    callback.onClick(true);
-                }
-            })
-            .setNegativeButton(no, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    callback.onClick(false);
-                }
-            })
-            .show();
+        this.activity.runOnUiThread(() -> {
+            this.lock.lock();
+
+            new AlertDialog.Builder(context)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(text)
+                .setPositiveButton(yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        callback.onClick(true);
+                    }
+                })
+                .setNegativeButton(no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        callback.onClick(false);
+                    }
+                })
+                .show();
+
+            this.lock.unlock();
+        });
     }
 
     public void hideMessage()
     {
-        this.wMessage.setVisibility(View.GONE);
-        this.wMessage_Image.setImageResource(0);
-        this.wMessage_Message.setText("");
+        this.activity.runOnUiThread(() -> {
+            this.lock.lock();
 
-        this.message_InProgress = false;
+            this.wMessage.setVisibility(View.GONE);
+            this.wMessage_Image.setImageResource(0);
+            this.wMessage_Message.setText("");
 
-        if (!this.loading_InProgress) {
-            this.activity.getActionBar().setDisplayHomeAsUpEnabled(
-                    this.activity.abHasParent());
-            this.activity.setRequestedOrientation(
-                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        }
+            this.message_InProgress = false;
+
+            if (!this.loading_InProgress) {
+                this.activity.getActionBar().setDisplayHomeAsUpEnabled(
+                        this.activity.abHasParent());
+    //            this.activity.setRequestedOrientation(
+    //                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+            }
+
+            this.lock.unlock();
+        });
     }
 
     public void showMessage(int image_id, String message,
             final Runnable message_close_listener)
     {
-        this.activity.abSoftKeyboard_Hide();
-        this.activity.getActionBar().setDisplayHomeAsUpEnabled(false);
+        this.activity.runOnUiThread(() -> {
+            this.lock.lock();
 
-        this.message_InProgress = true;
+            this.activity.abSoftKeyboard_Hide();
+            this.activity.getActionBar().setDisplayHomeAsUpEnabled(false);
 
-        this.wMessage.setVisibility(View.VISIBLE);
-        this.wMessage_Image.setImageResource(image_id);
-        this.wMessage_Message.setText(message);
+            this.message_InProgress = true;
 
-        final Notifications self = this;
-        this.wMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                self.hideMessage();
+            this.wMessage.setVisibility(View.VISIBLE);
+            this.wMessage_Image.setImageResource(image_id);
+            this.wMessage_Message.setText(message);
 
-                if (message_close_listener != null)
-                    message_close_listener.run();
-            }
+            final Notifications self = this;
+            this.wMessage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    self.hideMessage();
+
+                    if (message_close_listener != null)
+                        message_close_listener.run();
+                }
+            });
+
+            this.lock.unlock();
         });
     }
 

@@ -62,6 +62,11 @@ public class ABActivity extends Activity
         return view_group;
     }
 
+    public String abGetLayoutName()
+    {
+        return this.layout_Name;
+    }
+
     public boolean abHasParent()
     {
         return this.parent;
