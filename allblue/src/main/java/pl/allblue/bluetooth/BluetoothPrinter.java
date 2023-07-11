@@ -1,5 +1,6 @@
 package pl.allblue.bluetooth;
 
+import android.Manifest;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,7 +9,10 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.ParcelUuid;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONArray;
 
@@ -18,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.Permission;
 
 /**
  * Created by SfTd on 02/05/2016.
@@ -152,41 +157,50 @@ public class BluetoothPrinter
 
     public void connect(final OnConnectedListener listener)
     {
-        final BluetoothPrinter self = this;
-
-        Thread connect_thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (self.socket != null) {
-                    if (self.socket.isConnected()) {
-                        listener.onConnected();
-                        return;
-                    }
-
-                    try {
-                        self.socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                try {
-                    self.socket = self.device.createRfcommSocketToServiceRecord(
-                            self.device.getUuids()[0].getUuid());
-                } catch (final IOException e) {
-                    listener.onError(e);
+        Thread connect_thread = new Thread(() -> {
+            if (this.socket != null) {
+                if (this.socket.isConnected()) {
+                    listener.onConnected();
                     return;
                 }
 
                 try {
-                    self.socket.connect();
+                    this.socket.close();
                 } catch (IOException e) {
-                    listener.onError(e);
+                    e.printStackTrace();
+                }
+            }
+
+            try {
+                ParcelUuid[] uuids = this.device.getUuids();
+                if (uuids == null) {
+                    listener.onError(new IOException("Cannot get device uuids."));
                     return;
                 }
 
-                listener.onConnected();
+                if (uuids.length < 1) {
+                    listener.onError(new IOException("Empty device uuids."));
+                    return;
+                }
+
+                this.socket = this.device.createRfcommSocketToServiceRecord(
+                        uuids[0].getUuid());
+            } catch (final IOException e) {
+                listener.onError(e);
+                return;
+            } catch (SecurityException e) {
+                listener.onError(e);
+                return;
             }
+
+            try {
+                this.socket.connect();
+            } catch (IOException e) {
+                listener.onError(e);
+                return;
+            }
+
+            listener.onConnected();
         });
         connect_thread.start();
     }
@@ -251,7 +265,7 @@ public class BluetoothPrinter
     public interface OnConnectedListener
     {
         void onConnected();
-        void onError(IOException e);
+        void onError(Exception e);
     }
 
 }

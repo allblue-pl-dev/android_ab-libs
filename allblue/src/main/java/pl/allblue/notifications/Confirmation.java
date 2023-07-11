@@ -10,26 +10,27 @@ public class Confirmation
     static public void ShowDialog(Context context, String message,
             String yes_text, String no_text, final OnConfirmationResultListener listener)
     {
-        DialogInterface.OnClickListener dialog_listener =
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        listener.onResult(true);
-                        break;
+        DialogInterface.OnClickListener click_listener = (dialog, which) -> {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    listener.onResult(true);
+                    break;
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        listener.onResult(false);
-                        break;
-                }
+                default:
+                    listener.onResult(false);
+                    break;
             }
+        };
+
+        DialogInterface.OnCancelListener cancel_listener = (dialogInterface) -> {
+                listener.onResult(false);
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context)
             .setMessage(message)
-            .setPositiveButton(yes_text, dialog_listener)
-            .setNegativeButton(no_text, dialog_listener);
+            .setOnCancelListener(cancel_listener)
+            .setPositiveButton(yes_text, click_listener)
+            .setNegativeButton(no_text, click_listener);
 
         builder.show();
     }

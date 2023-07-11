@@ -30,13 +30,16 @@ public class ABStaticListView<CLASS> extends ListView
     {
         if (this.getCount() != this.itemsCount_Old)
         {
-            int height = getChildAt(0).getHeight() + 1;
+            View childView = this.getChildAt(0);
+            if (childView != null) {
+                int height = childView.getHeight() + 1;
 
-            this.itemsCount_Old = this.getCount();
+                this.itemsCount_Old = this.getCount();
 
-            ViewGroup.LayoutParams layout_params = this.getLayoutParams();
-            layout_params.height = this.getCount() * height;
-            this.setLayoutParams(layout_params);
+                ViewGroup.LayoutParams layout_params = this.getLayoutParams();
+                layout_params.height = this.getCount() * height;
+                this.setLayoutParams(layout_params);
+            }
         }
 
         super.onDraw(canvas);
