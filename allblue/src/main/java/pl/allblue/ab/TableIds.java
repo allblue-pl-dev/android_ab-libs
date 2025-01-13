@@ -104,7 +104,7 @@ public class TableIds
             json.put("tablesIds", tables_ids);
         } catch (JSONException e) {
             Log.e("TableIds", "Cannot parse table ids.", e);
-            new AssertionError("Cannot parse table ids: " + e.getMessage());
+            throw new AssertionError("Cannot parse table ids: " + e.getMessage());
         }
 
         try {
