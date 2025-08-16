@@ -110,10 +110,10 @@ public class ABActivity extends Activity
         this.abStartChildActivity(intent, for_result_request_code);
     }
 
-    protected boolean abDispatchTouchEvent(MotionEvent event)
-    {
-        return false;
-    }
+//    protected boolean abDispatchTouchEvent(MotionEvent event)
+//    {
+//        return false;
+//    }
 
     protected void abExtras_Load(Bundle extras)
     {
@@ -192,22 +192,22 @@ public class ABActivity extends Activity
 
 
     /* Activity Overrides */
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event)
-    {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            InputMethodManager imm = (InputMethodManager)this.getSystemService(
-                    Activity.INPUT_METHOD_SERVICE);
-
-            if (imm.hideSoftInputFromWindow(this.content.getWindowToken(), 0))
-                return true;
-        }
-
-        if (this.abDispatchTouchEvent(event))
-            return true;
-
-        return super.dispatchTouchEvent(event);
-    }
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent event)
+//    {
+//        if (event.getAction() == MotionEvent.ACTION_UP) {
+//            InputMethodManager imm = (InputMethodManager)this.getSystemService(
+//                    Activity.INPUT_METHOD_SERVICE);
+//
+//            if (imm.hideSoftInputFromWindow(this.content.getWindowToken(), 0))
+//                return true;
+//        }
+//
+//        if (this.abDispatchTouchEvent(event))
+//            return true;
+//
+//        return super.dispatchTouchEvent(event);
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
