@@ -59,8 +59,6 @@ public class TableIds
             if (ids.length() == 0)
                 throw new EmptyTableIdsException();
 
-            Log.d("Test", "Table Ids: " + ids.toString());
-
             next_id = ids.getInt(0);
 
             JSONArray new_ids = new JSONArray();
@@ -68,8 +66,6 @@ public class TableIds
                 new_ids.put(ids.getInt(i));
             tables_ids.put(table_alias, new_ids);
             json.put("tablesIds", tables_ids);
-
-            Log.d("Test", "Table Ids After: " + ids.toString());
 
             try {
                 ABFile.PutContent(this.context, TableIds.FileNames_TableIds,
