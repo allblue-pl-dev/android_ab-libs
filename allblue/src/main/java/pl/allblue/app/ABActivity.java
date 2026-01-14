@@ -83,6 +83,14 @@ public class ABActivity extends AppCompatActivity
         return this.parent;
     }
 
+    public ActivityResultLauncher<Intent> getActivityResultLauncher() {
+        return this.activityResultLauncher;
+    }
+
+    public void setActivityResultRequestCode(int requestCode) {
+        this.activityResultRequestCode = requestCode;
+    }
+
     public void abSoftKeyboard_Hide()
     {
         InputMethodManager imm = (InputMethodManager) getSystemService(
@@ -109,7 +117,7 @@ public class ABActivity extends AppCompatActivity
         else {
             this.activityResultRequestCode = for_result_request_code;
             this.activityResultLauncher.launch(intent);
-            Log.d("Test", "Launching for result!");
+//            Log.d("Test", "Launching for result!");
 //            this.startActivityForResult(intent, for_result_request_code);
         }
     }
@@ -139,6 +147,7 @@ public class ABActivity extends AppCompatActivity
     {
 
     }
+
 
     protected void abOnActivityResult(int request_code, int result_code, Intent data)
     {
@@ -266,8 +275,6 @@ public class ABActivity extends AppCompatActivity
     protected void onCreate(Bundle saved_instance_state)
     {
         super.onCreate(saved_instance_state);
-
-        Log.d("Test", "Registering for the activity result.");
 
         activityResultLauncher = this.registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), o -> {
