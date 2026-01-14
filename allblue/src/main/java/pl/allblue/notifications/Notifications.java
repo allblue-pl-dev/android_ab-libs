@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -88,8 +90,9 @@ public class Notifications {
             this.loading_InProgress = true;
 
             this.activity.abSoftKeyboard_Hide();
-            this.activity.getActionBar().setDisplayHomeAsUpEnabled(
-                    this.activity.abHasParent());
+            ActionBar sab = this.activity.getSupportActionBar();
+            if (sab != null)
+                sab.setDisplayHomeAsUpEnabled(this.activity.abHasParent());
 
             this.wLoading_Message.setText(message);
             this.wLoading_Gif.play();
@@ -110,10 +113,12 @@ public class Notifications {
             this.wLoading_Message.setText("");
 
             if (!this.message_InProgress) {
-                this.activity.getActionBar().setDisplayHomeAsUpEnabled(
-                        this.activity.abHasParent());
-//                this.activity.setRequestedOrientation(
-//                        ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                ActionBar sab = this.activity.getSupportActionBar();
+                if (sab != null) {
+                    sab.setDisplayHomeAsUpEnabled(this.activity.abHasParent());
+                    //                this.activity.setRequestedOrientation(
+                    //                        ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                }
             }
 
             this.lock.unlock();
@@ -159,10 +164,13 @@ public class Notifications {
             this.message_InProgress = false;
 
             if (!this.loading_InProgress) {
-                this.activity.getActionBar().setDisplayHomeAsUpEnabled(
-                        this.activity.abHasParent());
-    //            this.activity.setRequestedOrientation(
-    //                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                ActionBar sab = this.activity.getSupportActionBar();
+                if (sab != null) {
+                    sab.setDisplayHomeAsUpEnabled(
+                            this.activity.abHasParent());
+                    //            this.activity.setRequestedOrientation(
+                    //                    ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                }
             }
 
             this.lock.unlock();
@@ -176,7 +184,9 @@ public class Notifications {
             this.lock.lock();
 
             this.activity.abSoftKeyboard_Hide();
-            this.activity.getActionBar().setDisplayHomeAsUpEnabled(false);
+            ActionBar sab = this.activity.getSupportActionBar();
+            if (sab != null)
+                sab.setDisplayHomeAsUpEnabled(false);
 
             this.message_InProgress = true;
 

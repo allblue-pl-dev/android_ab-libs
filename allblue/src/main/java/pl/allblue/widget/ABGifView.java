@@ -63,7 +63,7 @@ public class ABGifView extends View
                 this.movie_TimeStart = time_now;
 
             final int movie_time = (int)((time_now - this.movie_TimeStart) % this.movie_Duration);
-
+            
             this.movie.setTime(movie_time);
             this.movie.draw(canvas, 0, 0);
         }

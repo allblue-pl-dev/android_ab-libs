@@ -1,8 +1,8 @@
 package pl.allblue.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -13,12 +13,19 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public class ABActivity extends Activity
+public class ABActivity extends AppCompatActivity
 {
-
     static public final String Extras_IsNew = ABApp.Path +
             "ABActivity.Extras_IsNew";
     static public final String Extras_HasParent = ABApp.Path +
@@ -39,6 +46,10 @@ public class ABActivity extends Activity
 
     /* Widgets */
     boolean widgets_InitializeOnCreate = false;
+
+    /* For Result */
+    ActivityResultLauncher<Intent> activityResultLauncher = null;
+    int activityResultRequestCode = 0;
 
     public ABActivity(int activity_layout_id)
     {
@@ -75,7 +86,7 @@ public class ABActivity extends Activity
     public void abSoftKeyboard_Hide()
     {
         InputMethodManager imm = (InputMethodManager) getSystemService(
-                Activity.INPUT_METHOD_SERVICE);
+                AppCompatActivity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(this.content.getWindowToken(), 0);
     }
 
@@ -95,8 +106,12 @@ public class ABActivity extends Activity
 
         if (for_result_request_code == null)
             this.startActivity(intent);
-        else
-            this.startActivityForResult(intent, for_result_request_code);
+        else {
+            this.activityResultRequestCode = for_result_request_code;
+            this.activityResultLauncher.launch(intent);
+            Log.d("Test", "Launching for result!");
+//            this.startActivityForResult(intent, for_result_request_code);
+        }
     }
 
     public void abStartChildActivity(Intent intent)
@@ -121,6 +136,11 @@ public class ABActivity extends Activity
     }
 
     protected void abExtras_Save(Bundle extras)
+    {
+
+    }
+
+    protected void abOnActivityResult(int request_code, int result_code, Intent data)
     {
 
     }
@@ -247,6 +267,15 @@ public class ABActivity extends Activity
     {
         super.onCreate(saved_instance_state);
 
+        Log.d("Test", "Registering for the activity result.");
+
+        activityResultLauncher = this.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), o -> {
+            Log.d("Test", "Activity result received.");
+            this.abOnActivityResult(this.activityResultRequestCode, o.getResultCode(),
+                    o.getData());
+        });
+
         /* Layout */
         this.layout_Name = this.getApplicationContext().getResources()
                 .getResourceEntryName(this.layout_Id);
@@ -269,7 +298,9 @@ public class ABActivity extends Activity
 
         /* AB Extras */
         this.parent = extras.getBoolean(ABActivity.Extras_HasParent, false);
-        this.getActionBar().setDisplayHomeAsUpEnabled(this.parent);
+        ActionBar sab = this.getSupportActionBar();
+        if (sab != null)
+            sab.setDisplayHomeAsUpEnabled(this.parent);
 
         /* Other Extras */
         this.abExtras_Load(extras);

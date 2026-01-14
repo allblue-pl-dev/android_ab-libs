@@ -5,14 +5,15 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
+
+import androidx.appcompat.widget.AppCompatButton;
 
 import pl.allblue.R;
 
 /**
  * Created by SfTd on 28/04/2015.
  */
-public class ABButton extends Button implements View.OnClickListener
+public class ABButton extends AppCompatButton implements View.OnClickListener
 {
 
     private int animation = -1;
